@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 let width = window.innerWidth;
 let height = window.innerHeight;
 
 
-let scene, camera;
+let scene, camera, controls, loader;
+let light;
 
 const init = () => {
   camera = new THREE.PerspectiveCamera(45, width / height);
@@ -17,27 +19,32 @@ const init = () => {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xddddddd);
 
-  let light = new THREE.AmbientLight(0xffffff, 3);
+  light = new THREE.AmbientLight(0xffffff, 3);
   scene.add(light);
-}
 
-let loadTheCar = (renderer) => {
-  let loader = new GLTFLoader();
-
-  loader.load("/models/scene.gltf", (gltf) => {
-    scene.add(gltf.scene);
-    renderScene(renderer);
-  });
-}
-
-const renderScene = (renderer) => {
-  renderer.render(scene, camera);
+  loader = new GLTFLoader();
 }
 
 const App = () => {
   const canvas = useRef();
   const [renderer, setRenderer] = useState();
   const [counter, setCounter] = useState(0);
+
+  const renderScene = () => {
+    renderer.render(scene, camera);
+  }
+
+  const loadTheCar = () => {
+    loader.load("/models/scene.gltf", (gltf) => {
+      scene.add(gltf.scene);
+      renderScene();
+    });
+  }
+  
+  const setupOrbitsControl = () => {
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.addEventListener('change', renderScene);
+  }
 
   useEffect(() => {
     canvas.current.setAttribute('width', width);
@@ -50,8 +57,9 @@ const App = () => {
 
   useEffect(() => {
     if (counter > 0) {
-      renderScene(renderer);
+      renderScene();
       loadTheCar(renderer);
+      setupOrbitsControl(renderer);
     } else {
       setCounter(counter => counter + 1);
     }
