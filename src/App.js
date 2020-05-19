@@ -22,6 +22,12 @@ const init = () => {
   light = new THREE.AmbientLight(0xffffff, 3);
   scene.add(light);
 
+  let geometry = new THREE.BoxGeometry( 20, 0.5, 20 );
+  let material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+  let map = new THREE.Mesh( geometry, material )
+
+  scene.add(map);
+
   loader = new GLTFLoader();
 }
 
@@ -36,6 +42,7 @@ const App = () => {
 
   const loadTheCar = () => {
     loader.load("/models/scene.gltf", (gltf) => {
+      gltf.scene.position.y = 2;
       scene.add(gltf.scene);
       renderScene();
     });
